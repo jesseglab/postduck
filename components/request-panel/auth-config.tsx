@@ -20,7 +20,11 @@ import {
 import { CheckCircle2 } from "lucide-react";
 import type { AuthType, AuthConfig, AuthSession } from "@/types";
 
-export function AuthConfig() {
+interface AuthConfigProps {
+  readOnly?: boolean;
+}
+
+export function AuthConfig({ readOnly = false }: AuthConfigProps) {
   const selectedRequest = useSelectedRequest();
   const { updateRequest: updateRequestStore, authSessions } = useAppStore();
 
@@ -124,6 +128,7 @@ export function AuthConfig() {
           <Select
             value={authType}
             onValueChange={(value) => handleAuthTypeChange(value as AuthType)}
+            disabled={readOnly}
           >
             <SelectTrigger>
               <SelectValue />
@@ -146,6 +151,7 @@ export function AuthConfig() {
               placeholder="Bearer token"
               value={authConfig.bearer?.token || ""}
               onChange={(e) => handleConfigChange("token", e.target.value)}
+              disabled={readOnly}
             />
           </div>
         )}
@@ -158,6 +164,7 @@ export function AuthConfig() {
                 placeholder="Username"
                 value={authConfig.basic?.username || ""}
                 onChange={(e) => handleConfigChange("username", e.target.value)}
+                disabled={readOnly}
               />
             </div>
             <div>
@@ -167,6 +174,7 @@ export function AuthConfig() {
                 placeholder="Password"
                 value={authConfig.basic?.password || ""}
                 onChange={(e) => handleConfigChange("password", e.target.value)}
+                disabled={readOnly}
               />
             </div>
           </div>
@@ -180,6 +188,7 @@ export function AuthConfig() {
                 placeholder="API key name"
                 value={authConfig.apikey?.key || ""}
                 onChange={(e) => handleConfigChange("key", e.target.value)}
+                disabled={readOnly}
               />
             </div>
             <div>
@@ -189,6 +198,7 @@ export function AuthConfig() {
                 placeholder="API key value"
                 value={authConfig.apikey?.value || ""}
                 onChange={(e) => handleConfigChange("value", e.target.value)}
+                disabled={readOnly}
               />
             </div>
             <div>
@@ -196,6 +206,7 @@ export function AuthConfig() {
               <Select
                 value={authConfig.apikey?.addTo || "header"}
                 onValueChange={(value) => handleConfigChange("addTo", value)}
+                disabled={readOnly}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -217,6 +228,7 @@ export function AuthConfig() {
             <Select
               value={useAuthSession || ""}
               onValueChange={(value) => handleSessionChange(value || null)}
+              disabled={readOnly}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a saved session" />

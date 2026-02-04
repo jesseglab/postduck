@@ -9,7 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export function HeadersEditor() {
+interface HeadersEditorProps {
+  readOnly?: boolean;
+}
+
+export function HeadersEditor({ readOnly = false }: HeadersEditorProps) {
   const selectedRequest = useSelectedRequest();
   const { updateRequest: updateRequestStore } = useAppStore();
   const [headers, setHeaders] = useState<Array<{ key: string; value: string }>>(
@@ -76,10 +80,12 @@ export function HeadersEditor() {
     <div className="flex flex-col h-full p-4 min-h-0">
       <div className="flex items-center justify-between mb-4 shrink-0">
         <h3 className="font-medium">Headers</h3>
-        <Button variant="outline" size="sm" onClick={handleAddHeader}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Header
-        </Button>
+        {!readOnly && (
+          <Button variant="outline" size="sm" onClick={handleAddHeader}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Header
+          </Button>
+        )}
       </div>
 
       <ScrollArea className="flex-1 min-h-0">
@@ -106,15 +112,17 @@ export function HeadersEditor() {
                   className="w-full"
                 />
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleRemoveHeader(index)}
-                className="h-7 px-2 text-xs"
-              >
-                <Trash2 className="h-3 w-3 mr-1" />
-                Delete
-              </Button>
+              {!readOnly && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRemoveHeader(index)}
+                  className="h-7 px-2 text-xs"
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Delete
+                </Button>
+              )}
             </div>
           ))}
         </div>

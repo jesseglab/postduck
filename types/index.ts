@@ -147,3 +147,49 @@ export interface AuthExtractionConfig {
   sessionName?: string;
   saveAsEnvVariable?: string;
 }
+
+export type TeamRole = "SPACE_COMMANDER" | "STAR_NAVIGATOR" | "COSMIC_OBSERVER";
+
+export interface Team {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TeamMember {
+  id: string;
+  teamId: string;
+  userId: string;
+  role: TeamRole;
+  joinedAt: Date;
+  user?: {
+    id: string;
+    email: string;
+    name: string | null;
+    image: string | null;
+  };
+}
+
+export interface TeamInvitation {
+  id: string;
+  teamId: string;
+  email: string;
+  role: TeamRole;
+  token: string;
+  expiresAt: Date;
+  createdAt: Date;
+}
+
+export interface Subscription {
+  id: string;
+  teamId: string;
+  stripeCustomerId: string;
+  stripeSubscriptionId: string | null;
+  stripePriceId: string | null;
+  status: string;
+  currentPeriodEnd: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}

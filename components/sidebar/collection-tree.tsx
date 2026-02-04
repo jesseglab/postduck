@@ -41,6 +41,8 @@ import {
   ContextMenuTrigger,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
+import { useCanEdit } from "@/hooks/use-team";
+import { useState as useStateTeam, useEffect as useEffectTeam } from "react";
 
 type DragItem = {
   id: string;
@@ -57,6 +59,30 @@ export function CollectionTree() {
     setSelectedRequest,
   } = useAppStore();
   const { workspace } = useAppStore();
+  const [currentUserId, setCurrentUserId] = useStateTeam<string | null>(null);
+  const [teamId, setTeamId] = useStateTeam<string | null>(null);
+
+  useEffectTeam(() => {
+    fetch("/api/user/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.id) {
+          setCurrentUserId(data.id);
+        }
+      })
+      .catch(() => {});
+
+    // Check if workspace is a team workspace
+    if (workspace && (workspace as any).teamId) {
+      setTeamId((workspace as any).teamId);
+    } else {
+      setTeamId(null);
+    }
+  }, [workspace]);
+
+  const canEdit = useCanEdit(teamId, currentUserId);
+  const isReadOnly = teamId !== null && !canEdit;
+
   const [showCollectionPrompt, setShowCollectionPrompt] = useState(false);
   const [showRequestPrompt, setShowRequestPrompt] = useState(false);
   const [showImportCurlDialog, setShowImportCurlDialog] = useState(false);
@@ -562,13 +588,15 @@ export function CollectionTree() {
                         </div>
                       </ContextMenuTrigger>
                       <ContextMenuContent>
-                        <ContextMenuItem
-                          onClick={() => handleDeleteRequest(request.id)}
-                          variant="destructive"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </ContextMenuItem>
+                        {!isReadOnly && (
+                          <ContextMenuItem
+                            onClick={() => handleDeleteRequest(request.id)}
+                            variant="destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </ContextMenuItem>
+                        )}
                       </ContextMenuContent>
                     </ContextMenu>
                   );
@@ -578,33 +606,39 @@ export function CollectionTree() {
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem onClick={() => handleCreateRequest(collectionId)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Request
-          </ContextMenuItem>
-          <ContextMenuSeparator />
-          <ContextMenuItem
-            onClick={() => handleMoveUp(collectionId)}
-            disabled={!canMoveUp(collectionId)}
-          >
-            <ArrowUp className="h-4 w-4 mr-2" />
-            Move Up
-          </ContextMenuItem>
-          <ContextMenuItem
-            onClick={() => handleMoveDown(collectionId)}
-            disabled={!canMoveDown(collectionId)}
-          >
-            <ArrowDown className="h-4 w-4 mr-2" />
-            Move Down
-          </ContextMenuItem>
-          <ContextMenuSeparator />
-          <ContextMenuItem
-            onClick={() => handleDeleteCollection(collectionId)}
-            variant="destructive"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </ContextMenuItem>
+          {!isReadOnly && (
+            <>
+              <ContextMenuItem
+                onClick={() => handleCreateRequest(collectionId)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Request
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem
+                onClick={() => handleMoveUp(collectionId)}
+                disabled={!canMoveUp(collectionId)}
+              >
+                <ArrowUp className="h-4 w-4 mr-2" />
+                Move Up
+              </ContextMenuItem>
+              <ContextMenuItem
+                onClick={() => handleMoveDown(collectionId)}
+                disabled={!canMoveDown(collectionId)}
+              >
+                <ArrowDown className="h-4 w-4 mr-2" />
+                Move Down
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem
+                onClick={() => handleDeleteCollection(collectionId)}
+                variant="destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </ContextMenuItem>
+            </>
+          )}
         </ContextMenuContent>
       </ContextMenu>
     );
@@ -618,35 +652,41 @@ export function CollectionTree() {
     <>
       <div className="p-2">
         <div className="flex gap-2 mb-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex-1 justify-start"
-            onClick={handleCreateCollection}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Collection
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Upload className="h-4 w-4" />
-                <ChevronDown className="h-4 w-4 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowImportCurlDialog(true)}>
-                <Upload className="h-4 w-4 mr-2" />
-                Import cURL
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setShowImportPostmanDialog(true)}
+          {!isReadOnly && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex-1 justify-start"
+                onClick={handleCreateCollection}
               >
-                <Upload className="h-4 w-4 mr-2" />
-                Import Postman
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <Plus className="h-4 w-4 mr-2" />
+                New Collection
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Upload className="h-4 w-4" />
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => setShowImportCurlDialog(true)}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import cURL
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setShowImportPostmanDialog(true)}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import Postman
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
         </div>
         <Tree
           className="bg-background"
