@@ -37,8 +37,6 @@ interface RequestBuilderProps {
   onMethodChange: (method: HttpMethod) => void;
   onUrlChange: (url: string) => void;
   onOpenLoginResponse?: (response: ExecuteResponse) => void;
-  readOnly?: boolean;
-  canExecute?: boolean;
 }
 
 export function RequestBuilder({
@@ -50,8 +48,6 @@ export function RequestBuilder({
   onMethodChange: setLocalMethod,
   onUrlChange: setLocalUrl,
   onOpenLoginResponse,
-  readOnly = false,
-  canExecute = true,
 }: RequestBuilderProps) {
   const selectedRequest = useSelectedRequest();
   const {
@@ -327,21 +323,18 @@ export function RequestBuilder({
           url={localUrl}
           onMethodChange={setLocalMethod}
           onUrlChange={setLocalUrl}
-          readOnly={readOnly}
         />
-        <Button onClick={handleExecute} disabled={isExecuting || !canExecute}>
+        <Button onClick={handleExecute} disabled={isExecuting}>
           <Send className="h-4 w-4 mr-2" />
           {isExecuting ? "Sending..." : "Send"}
         </Button>
         {onOpenLoginResponse && (
           <AuthStatusIndicator onOpenLoginResponse={onOpenLoginResponse} />
         )}
-        {!readOnly && (
-          <Button variant="outline" onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
-            Save
-          </Button>
-        )}
+        <Button variant="outline" onClick={handleSave}>
+          <Save className="h-4 w-4 mr-2" />
+          Save
+        </Button>
       </div>
       <PathParamsEditor url={localUrl} onParamsChange={setPathParams} />
     </div>

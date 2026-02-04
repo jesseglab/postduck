@@ -19,10 +19,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  workspaces      Workspace[]
-  accounts        Account[]
-  sessions        Session[]
-  teamMemberships TeamMember[]
+  workspaces Workspace[]
+  accounts   Account[]
+  sessions   Session[]
 }
 
 model Account {
@@ -65,18 +64,15 @@ model Session {
 model Workspace {
   id        String   @id @default(cuid())
   userId    String
-  teamId    String?
   name      String
   isLocal   Boolean  @default(false)
   syncedAt  DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team         Team?         @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  collections  Collection[]
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collections Collection[]
   environments Environment[]
-  authSessions AuthSession[]
 }
 
 model Collection {
@@ -95,20 +91,18 @@ model Collection {
 }
 
 model Request {
-  id             String   @id @default(cuid())
-  collectionId   String
-  name           String
-  method         String
-  url            String   @default("")
-  headers        Json     @default("{}")
-  body           Json     @default("{}")
-  authType       String   @default("none")
-  authConfig     Json     @default("{}")
-  authExtraction Json?
-  useAuthSession String?
-  order          Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id          String   @id @default(cuid())
+  collectionId String
+  name        String
+  method      String
+  url         String   @default("")
+  headers     Json     @default("{}")
+  body        Json     @default("{}")
+  authType    String   @default("none")
+  authConfig  Json     @default("{}")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   collection     Collection       @relation(fields: [collectionId], references: [id], onDelete: Cascade)
   requestHistory RequestHistory[]
@@ -140,87 +134,4 @@ model RequestHistory {
   executedAt   DateTime @default(now())
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
-}
-
-enum TeamRole {
-  SPACE_COMMANDER
-  STAR_NAVIGATOR
-  COSMIC_OBSERVER
-}
-
-model Team {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  members      TeamMember[]
-  invitations  TeamInvitation[]
-  workspaces   Workspace[]
-  subscription Subscription?
-
-  @@index([slug])
-}
-
-model TeamMember {
-  id       String   @id @default(cuid())
-  teamId   String
-  userId   String
-  role     TeamRole @default(COSMIC_OBSERVER)
-  joinedAt DateTime @default(now())
-
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([teamId, userId])
-  @@index([userId])
-  @@index([teamId])
-}
-
-model TeamInvitation {
-  id        String   @id @default(cuid())
-  teamId    String
-  email     String
-  role      TeamRole @default(COSMIC_OBSERVER)
-  token     String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-
-  @@index([email])
-  @@index([token])
-}
-
-model Subscription {
-  id                   String   @id @default(cuid())
-  teamId               String   @unique
-  stripeCustomerId     String   @unique
-  stripeSubscriptionId String?  @unique
-  stripePriceId        String?
-  status               String   @default("inactive")
-  currentPeriodEnd     DateTime?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-}
-
-model AuthSession {
-  id                     String   @id @default(cuid())
-  workspaceId            String
-  name                   String
-  requestId              String
-  tokenType              String
-  tokenValue             String   @db.Text
-  expiresAt              DateTime?
-  loginResponseHistoryId String?
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-  @@index([requestId])
 }

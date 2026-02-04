@@ -15,7 +15,6 @@ interface UrlBarProps {
   url: string;
   onMethodChange: (method: HttpMethod) => void;
   onUrlChange: (url: string) => void;
-  readOnly?: boolean;
 }
 
 export function UrlBar({
@@ -23,14 +22,12 @@ export function UrlBar({
   url,
   onMethodChange,
   onUrlChange,
-  readOnly = false,
 }: UrlBarProps) {
   return (
     <div className="flex gap-2 flex-1">
       <Select
         value={method}
         onValueChange={(value) => onMethodChange(value as HttpMethod)}
-        disabled={readOnly}
       >
         <SelectTrigger className="w-32">
           <SelectValue />
@@ -50,7 +47,6 @@ export function UrlBar({
         onChange={(e) => onUrlChange(e.target.value)}
         placeholder="Enter URL or use {{variable}}"
         className="flex-1 font-mono text-sm"
-        disabled={readOnly}
       />
     </div>
   );

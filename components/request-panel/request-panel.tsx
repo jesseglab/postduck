@@ -9,8 +9,6 @@ import { BodyEditor } from "./body-editor";
 import { AuthConfig } from "./auth-config";
 import { AuthExtractionConfig } from "./auth-extraction-config";
 import { CurlPreview } from "./curl-preview";
-import { useCanEdit, useCanExecute } from "@/hooks/use-team";
-import { useAppStore } from "@/lib/store";
 import type { ExecuteResponse, HttpMethod } from "@/types";
 import { motion } from "framer-motion";
 
@@ -32,32 +30,8 @@ export function RequestPanel({
   onCollapseResponse,
 }: RequestPanelProps) {
   const selectedRequest = useSelectedRequest();
-  const { workspace } = useAppStore();
   const [localUrl, setLocalUrl] = useState("");
   const [localMethod, setLocalMethod] = useState<HttpMethod>("GET");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [teamId, setTeamId] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/user/me")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.id) {
-          setCurrentUserId(data.id);
-        }
-      })
-      .catch(() => {});
-
-    if (workspace && (workspace as any).teamId) {
-      setTeamId((workspace as any).teamId);
-    } else {
-      setTeamId(null);
-    }
-  }, [workspace]);
-
-  const canEdit = useCanEdit(teamId, currentUserId);
-  const canExecuteRequest = useCanExecute(teamId, currentUserId);
-  const isReadOnly = teamId !== null && !canEdit;
 
   useEffect(() => {
     if (selectedRequest) {
@@ -93,8 +67,6 @@ export function RequestPanel({
         onMethodChange={setLocalMethod}
         onUrlChange={setLocalUrl}
         onOpenLoginResponse={onOpenLoginResponse}
-        readOnly={isReadOnly}
-        canExecute={canExecuteRequest}
       />
 
       {selectedRequest && (
@@ -117,18 +89,18 @@ export function RequestPanel({
                 value="headers"
                 className="flex-1 overflow-hidden m-0"
               >
-                <HeadersEditor readOnly={isReadOnly} />
+                <HeadersEditor />
               </TabsContent>
 
               <TabsContent value="auth" className="flex-1 overflow-hidden m-0">
-                <AuthConfig readOnly={isReadOnly} />
+                <AuthConfig />
               </TabsContent>
 
               <TabsContent
                 value="auth-extraction"
                 className="flex-1 overflow-hidden m-0"
               >
-                <AuthExtractionConfig readOnly={isReadOnly} />
+                <AuthExtractionConfig />
               </TabsContent>
             </Tabs>
           </div>

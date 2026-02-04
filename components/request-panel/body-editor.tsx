@@ -23,11 +23,7 @@ const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
 });
 
-interface BodyEditorProps {
-  readOnly?: boolean;
-}
-
-export function BodyEditor({ readOnly = false }: BodyEditorProps) {
+export function BodyEditor() {
   const selectedRequest = useSelectedRequest();
   const { updateRequest: updateRequestStore } = useAppStore();
   const [bodyType, setBodyType] = useState<
