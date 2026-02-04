@@ -8,6 +8,7 @@ import { isAuthSessionExpired, formatTimeAgo } from "@/lib/auth-extraction";
 import { deleteAuthSession } from "@/hooks/use-local-db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/local";
+import type { AuthSession } from "@/types";
 
 export function AuthSessionIndicator() {
   const {
@@ -23,7 +24,7 @@ export function AuthSessionIndicator() {
       () =>
         workspace
           ? db.authSessions.where("workspaceId").equals(workspace.id).toArray()
-          : Promise.resolve([]),
+          : Promise.resolve([] as AuthSession[]),
       [workspace?.id]
     ) || [];
 

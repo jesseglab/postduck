@@ -92,6 +92,9 @@ export function ResponsePanel({
     return "bg-gray-500";
   };
 
+  // TypeScript doesn't narrow after the early returns above
+  if (!response) return null;
+
   return (
     <motion.div
       layout

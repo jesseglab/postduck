@@ -7,8 +7,7 @@ import type { Request, Collection, Environment, Workspace } from "@/types";
  */
 export async function syncToCloud(userId: string) {
   const localWorkspace = await db.workspaces
-    .where("isLocal")
-    .equals(true)
+    .filter((w) => w.isLocal === true)
     .first();
   if (!localWorkspace) return;
 
@@ -132,8 +131,7 @@ export async function syncFromCloud(userId: string) {
 
   const cloudWorkspace = cloudWorkspaces[0];
   const localWorkspace = await db.workspaces
-    .where("isLocal")
-    .equals(true)
+    .filter((w) => w.isLocal === true)
     .first();
 
   // Sync collections

@@ -9,6 +9,7 @@ import {
   CodeBlockBody,
   CodeBlockItem,
   CodeBlockContent,
+  type BundledLanguage,
 } from "@/components/kibo-ui/code-block";
 
 interface ResponseCurlPreviewProps {
@@ -74,7 +75,7 @@ export function ResponseCurlPreview({ response }: ResponseCurlPreviewProps) {
 
   const codeData = [
     {
-      language: "curl",
+      language: "bash" as const,
       filename: "response.txt",
       code: curlOutput,
     },
@@ -112,7 +113,10 @@ export function ResponseCurlPreview({ response }: ResponseCurlPreviewProps) {
               lineNumbers={false}
               className="h-full text-[10px] [&_code]:text-[10px] [&_pre]:text-[10px]"
             >
-              <CodeBlockContent language="text" syntaxHighlighting={true}>
+              <CodeBlockContent
+                language={item.language as BundledLanguage}
+                syntaxHighlighting={true}
+              >
                 {item.code}
               </CodeBlockContent>
             </CodeBlockItem>

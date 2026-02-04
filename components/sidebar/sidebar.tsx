@@ -78,7 +78,7 @@ export function Sidebar({ onHistoryItemClick }: SidebarProps) {
     () =>
       workspace
         ? db.authSessions.where("workspaceId").equals(workspace.id).toArray()
-        : Promise.resolve([]),
+        : Promise.resolve([] as AuthSession[]),
     [workspace?.id]
   );
 

@@ -80,11 +80,22 @@ export function AuthConfig() {
     const newConfig = { ...authConfig };
 
     if (authType === "bearer") {
-      newConfig.bearer = { ...newConfig.bearer, [field]: value };
+      newConfig.bearer = { token: "", ...newConfig.bearer, [field]: value };
     } else if (authType === "basic") {
-      newConfig.basic = { ...newConfig.basic, [field]: value };
+      newConfig.basic = {
+        username: "",
+        password: "",
+        ...newConfig.basic,
+        [field]: value,
+      };
     } else if (authType === "apikey") {
-      newConfig.apikey = { ...newConfig.apikey, [field]: value };
+      newConfig.apikey = {
+        key: "",
+        value: "",
+        addTo: "header" as const,
+        ...newConfig.apikey,
+        [field]: value,
+      };
     }
 
     setAuthConfig(newConfig);

@@ -367,7 +367,6 @@ export function BodyEditor() {
               formatOnType: false,
               suggestOnTriggerCharacters: true,
               autoIndent: "none",
-              formatOnSave: false,
               acceptSuggestionOnEnter: "on",
               quickSuggestions: true,
               bracketPairColorization: { enabled: true },

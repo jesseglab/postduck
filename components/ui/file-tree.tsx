@@ -68,6 +68,7 @@ const Tree = forwardRef<HTMLDivElement, TreeViewProps>(
       openIcon,
       closeIcon,
       dir,
+      defaultValue: _defaultValue, // Destructure to avoid passing to Accordion
       ...props
     },
     ref

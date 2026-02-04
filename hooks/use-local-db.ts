@@ -204,10 +204,13 @@ export async function moveCollectionDown(id: string): Promise<void> {
     return;
   }
 
-  const siblings = await db.collections
-    .where("parentId")
-    .equals(collection.parentId)
-    .toArray();
+  const siblings =
+    collection.parentId === null
+      ? await db.collections.filter((c) => c.parentId === null).toArray()
+      : await db.collections
+          .where("parentId")
+          .equals(collection.parentId)
+          .toArray();
 
   // Sort siblings by order
   const sortedSiblings = siblings.sort((a, b) => a.order - b.order);
