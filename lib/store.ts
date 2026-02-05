@@ -19,6 +19,7 @@ interface AppState {
   environments: Environment[];
   workspace: Workspace | null;
   authSessions: AuthSession[];
+  agentConnected: boolean;
 
   // Actions
   setSelectedRequest: (id: string | null) => void;
@@ -38,6 +39,7 @@ interface AppState {
   addAuthSession: (session: AuthSession) => void;
   updateAuthSession: (id: string, updates: Partial<AuthSession>) => void;
   deleteAuthSession: (id: string) => void;
+  setAgentConnected: (connected: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -49,6 +51,7 @@ export const useAppStore = create<AppState>((set) => ({
   environments: [],
   workspace: null,
   authSessions: [],
+  agentConnected: false,
 
   setSelectedRequest: (id) => set({ selectedRequestId: id }),
   setSelectedCollection: (id) => set({ selectedCollectionId: id }),
@@ -95,4 +98,5 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       authSessions: state.authSessions.filter((s) => s.id !== id),
     })),
+  setAgentConnected: (connected) => set({ agentConnected: connected }),
 }));

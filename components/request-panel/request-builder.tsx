@@ -21,6 +21,8 @@ import {
 import { replacePathParams } from "@/lib/path-params";
 import { extractAuthToken, getActiveAuthSession } from "@/lib/auth-extraction";
 import { db } from "@/lib/db/local";
+import { isLocalhostUrl, proxyViaAgent } from "@/lib/agent";
+import { AgentInstallDialog } from "@/components/modals/agent-install-dialog";
 import type {
   ExecuteRequestParams,
   ExecuteResponse,
@@ -56,9 +58,11 @@ export function RequestBuilder({
     authSessions,
     addAuthSession,
     updateAuthSession,
+    agentConnected,
   } = useAppStore();
   const activeEnvironment = useActiveEnvironment();
   const [pathParams, setPathParams] = useState<Record<string, string>>({});
+  const [showAgentDialog, setShowAgentDialog] = useState(false);
 
   const handleSave = async () => {
     if (!selectedRequest) return;
@@ -177,11 +181,25 @@ export function RequestBuilder({
         authConfig: selectedRequest.authConfig,
       };
 
-      const response = await fetch("/api/proxy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
-      });
+      // Determine which proxy to use
+      const isLocalhost = isLocalhostUrl(interpolated.url);
+
+      let response: Response;
+      if (isLocalhost) {
+        if (!agentConnected) {
+          // Show agent required dialog
+          setShowAgentDialog(true);
+          setIsExecuting(false);
+          return;
+        }
+        response = await proxyViaAgent(params);
+      } else {
+        response = await fetch("/api/proxy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(params),
+        });
+      }
 
       const data: ExecuteResponse = await response.json();
 
@@ -337,6 +355,10 @@ export function RequestBuilder({
         </Button>
       </div>
       <PathParamsEditor url={localUrl} onParamsChange={setPathParams} />
+      <AgentInstallDialog
+        open={showAgentDialog}
+        onOpenChange={setShowAgentDialog}
+      />
     </div>
   );
 }

@@ -3,16 +3,33 @@
 import { Sidebar } from "@/components/sidebar/sidebar";
 import { RequestPanel } from "@/components/request-panel/request-panel";
 import { ResponsePanel } from "@/components/response-panel/response-panel";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ExecuteResponse, RequestHistory } from "@/types";
 import { useAppStore } from "@/lib/store";
 import { db } from "@/lib/db/local";
+import { checkAgentStatus } from "@/lib/agent";
 
 export function MainLayout() {
   const [response, setResponse] = useState<ExecuteResponse | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
   const [isResponseExpanded, setIsResponseExpanded] = useState(false);
-  const { setSelectedRequest, requests } = useAppStore();
+  const { setSelectedRequest, requests, setAgentConnected } = useAppStore();
+
+  // Poll agent status on mount and periodically
+  useEffect(() => {
+    const checkAgent = async () => {
+      const connected = await checkAgentStatus();
+      setAgentConnected(connected);
+    };
+
+    // Check immediately
+    checkAgent();
+
+    // Then check every 5 seconds
+    const interval = setInterval(checkAgent, 5000);
+
+    return () => clearInterval(interval);
+  }, [setAgentConnected]);
 
   const handleHistoryItemClick = async (historyItem: RequestHistory) => {
     // Convert history item to ExecuteResponse format

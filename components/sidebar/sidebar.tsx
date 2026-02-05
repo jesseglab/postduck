@@ -39,6 +39,7 @@ import { deleteAuthSession } from "@/hooks/use-local-db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/local";
 import { useTheme } from "next-themes";
+import { AgentStatusIndicator } from "./agent-status-indicator";
 import type {
   AuthSession,
   RequestHistory as RequestHistoryType,
@@ -177,6 +178,8 @@ export function Sidebar({ onHistoryItemClick }: SidebarProps) {
 
       <div className="p-4 border-t space-y-2 shrink-0">
         <EnvironmentSelector />
+
+        <AgentStatusIndicator />
 
         <div className="flex gap-2">
           <DropdownMenu>
