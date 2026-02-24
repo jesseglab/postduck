@@ -252,7 +252,7 @@ export function RequestBuilder({
       }
       if (typeof data.body !== "string") {
         console.warn("Response body is not a string:", typeof data.body, data.body);
-        data.body = data.body?.toString() || "";
+        data.body = "";
       }
       // Ensure body is always a string, even if it's null/undefined
       if (!data.body) {
