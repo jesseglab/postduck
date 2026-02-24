@@ -293,8 +293,19 @@ export function BodyEditor() {
     }
   };
 
-  const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
-    editorRef.current = editor;
+  const handleEditorDidMount = async (editorInstance: editor.IStandaloneCodeEditor) => {
+    editorRef.current = editorInstance;
+    
+    // Add keyboard shortcut for Cmd+Enter / Ctrl+Enter to send request
+    // Import monaco dynamically to ensure it's available
+    const monaco = await import("monaco-editor");
+    editorInstance.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+      () => {
+        // Dispatch custom event to trigger request send
+        window.dispatchEvent(new CustomEvent("send-request"));
+      }
+    );
   };
 
   if (!selectedRequest) return null;

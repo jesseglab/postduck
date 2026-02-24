@@ -1,0 +1,37 @@
+{
+  "id": "3f8e1fb7-0f52-4c57-8d2e-b5b2d19cf443",
+  "name": "postduck - local",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5027",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "bearer_token",
+      "value": "",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "api_key",
+      "value": "",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "basic_username",
+      "value": "",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "basic_password",
+      "value": "",
+      "enabled": true,
+      "type": "secret"
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}

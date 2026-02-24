@@ -1,0 +1,214 @@
+{
+  "info": {
+    "_postman_id": "8a4c7ed3-3a62-4d6b-a1e2-9feacb4d4a2f",
+    "name": "Postduck API",
+    "description": "Auto-generated Postman collection for Postduck (Next.js API routes under /api). Base URL defaults to http://localhost:5027; update via environment variables as needed.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Better Auth catch-all routes under /api/auth/*.",
+      "item": [
+        {
+          "name": "Auth GET (catch-all)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/:path",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", ":path"],
+              "variable": [
+                {
+                  "key": "path",
+                  "value": "session",
+                  "description": "Auth path segment (e.g., session, providers, callback, verify-email, sign-in, sign-up, sign-out)."
+                }
+              ]
+            },
+            "description": "Catch-all GET handler for Better Auth endpoints. Replace :path with the specific auth endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Auth POST (catch-all)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/:path",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", ":path"],
+              "variable": [
+                {
+                  "key": "path",
+                  "value": "sign-in",
+                  "description": "Auth path segment (e.g., sign-in, sign-up, reset-password)."
+                }
+              ]
+            },
+            "description": "Catch-all POST handler for Better Auth endpoints. Body shape depends on the auth action; update fields as needed."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Requests",
+      "description": "Utilities for parsing and executing requests.",
+      "item": [
+        {
+          "name": "Parse cURL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"curlCommand\": \"curl https://example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/parse-curl",
+              "host": ["{{base_url}}"],
+              "path": ["api", "parse-curl"]
+            },
+            "description": "Parse a curl command into method, URL, headers, body, and auth details."
+          },
+          "response": []
+        },
+        {
+          "name": "Proxy Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"GET\",\n  \"url\": \"https://httpbin.org/get\",\n  \"headers\": {\n    \"accept\": \"application/json\"\n  },\n  \"body\": {\n    \"type\": \"none\"\n  },\n  \"authType\": \"none\",\n  \"authConfig\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/proxy",
+              "host": ["{{base_url}}"],
+              "path": ["api", "proxy"]
+            },
+            "description": "Execute an HTTP request via the Postduck proxy. The URL must be an absolute URL."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sync",
+      "description": "Sync workspace data between local and cloud.",
+      "item": [
+        {
+          "name": "Sync Workspace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"to-cloud\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/sync",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sync"]
+            },
+            "description": "Sync data to or from the cloud. Requires an authenticated Better Auth session cookie. Use direction: \"to-cloud\" or \"from-cloud\"."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Documentation",
+      "description": "Documentation helpers.",
+      "item": [
+        {
+          "name": "Get Tutorial Markdown",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/tutorial-markdown",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tutorial-markdown"]
+            },
+            "description": "Return the contents of GENERATE-POSTMAN-COLLECTION.md as JSON."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5027"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ]
+}

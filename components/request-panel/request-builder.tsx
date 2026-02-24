@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSelectedRequest } from "@/hooks/use-request";
 import { useAppStore } from "@/lib/store";
 import {
@@ -64,6 +64,12 @@ export function RequestBuilder({
   const [pathParams, setPathParams] = useState<Record<string, string>>({});
   const [showAgentDialog, setShowAgentDialog] = useState(false);
 
+  // Get platform-specific shortcut text
+  const shortcutText =
+    typeof window !== "undefined" && navigator.platform.toUpperCase().indexOf("MAC") >= 0
+      ? "⌘↵"
+      : "Ctrl+Enter";
+
   const handleSave = async () => {
     if (!selectedRequest) return;
     const updates = {
@@ -74,7 +80,7 @@ export function RequestBuilder({
     updateRequestStore(selectedRequest.id, updates);
   };
 
-  const handleExecute = async () => {
+  const handleExecute = useCallback(async () => {
     if (!selectedRequest) return;
 
     setIsExecuting(true);
@@ -201,7 +207,70 @@ export function RequestBuilder({
         });
       }
 
-      const data: ExecuteResponse = await response.json();
+      // Check if response is OK or if it's from agent (agent always returns 200 even for errors)
+      if (!response.ok && !isLocalhost) {
+        throw new Error(
+          `Request failed with status ${response.status}: ${response.statusText}`
+        );
+      }
+
+      // Parse response body
+      let data: ExecuteResponse;
+      try {
+        const responseText = await response.text();
+        if (!responseText || responseText.trim() === "") {
+          console.error("Empty response from agent/server");
+          throw new Error("Empty response from server");
+        }
+        data = JSON.parse(responseText);
+        console.log("Parsed response data:", {
+          statusCode: data.statusCode,
+          bodyLength: data.body?.length ?? 0,
+          hasBody: typeof data.body === "string",
+        });
+      } catch (parseError) {
+        console.error("Failed to parse response:", parseError);
+        throw new Error(
+          `Failed to parse response: ${
+            parseError instanceof Error ? parseError.message : "Unknown error"
+          }`
+        );
+      }
+
+      // Validate response structure
+      if (!data || typeof data !== "object") {
+        console.error("Invalid response format:", data);
+        throw new Error("Invalid response format from server");
+      }
+
+      // Ensure required fields exist with defaults
+      if (typeof data.statusCode !== "number") {
+        data.statusCode = 0;
+      }
+      if (!data.headers || typeof data.headers !== "object") {
+        data.headers = {};
+      }
+      if (typeof data.body !== "string") {
+        console.warn("Response body is not a string:", typeof data.body, data.body);
+        data.body = data.body?.toString() || "";
+      }
+      // Ensure body is always a string, even if it's null/undefined
+      if (!data.body) {
+        data.body = "";
+      }
+      if (typeof data.duration !== "number") {
+        data.duration = 0;
+      }
+      if (typeof data.size !== "number") {
+        data.size = 0;
+      }
+      
+      console.log("Final response data being passed to onExecute:", {
+        statusCode: data.statusCode,
+        bodyType: typeof data.body,
+        bodyLength: data.body.length,
+        bodyPreview: data.body.substring(0, 100),
+      });
 
       // Save to history
       let historyId: string | undefined;
@@ -323,7 +392,60 @@ export function RequestBuilder({
     } finally {
       setIsExecuting(false);
     }
-  };
+  }, [
+    selectedRequest,
+    localUrl,
+    localMethod,
+    pathParams,
+    activeEnvironment,
+    authSessions,
+    workspace,
+    agentConnected,
+    setIsExecuting,
+    onExecute,
+    updateRequestStore,
+    addAuthSession,
+    updateAuthSession,
+    createAuthSession,
+    updateEnvironment,
+  ]);
+
+  // Keyboard shortcut handler for Cmd+Enter / Ctrl+Enter
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux)
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        // Don't trigger if user is typing in an input/textarea (but allow Monaco editor)
+        const target = e.target as HTMLElement;
+        // Allow Monaco editor - it will handle the shortcut itself
+        // Only block regular inputs/textareas
+        if (
+          (target.tagName === "INPUT" || target.tagName === "TEXTAREA") &&
+          !target.closest(".monaco-editor")
+        ) {
+          return;
+        }
+        e.preventDefault();
+        if (!isExecuting && selectedRequest) {
+          handleExecute();
+        }
+      }
+    };
+
+    // Listen for custom event from Monaco editor
+    const handleSendRequest = () => {
+      if (!isExecuting && selectedRequest) {
+        handleExecute();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("send-request", handleSendRequest as EventListener);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("send-request", handleSendRequest as EventListener);
+    };
+  }, [isExecuting, selectedRequest, handleExecute]);
 
   if (!selectedRequest) {
     return (
@@ -342,9 +464,9 @@ export function RequestBuilder({
           onMethodChange={setLocalMethod}
           onUrlChange={setLocalUrl}
         />
-        <Button onClick={handleExecute} disabled={isExecuting}>
+        <Button onClick={handleExecute} disabled={isExecuting} title={`Send request (${shortcutText})`}>
           <Send className="h-4 w-4 mr-2" />
-          {isExecuting ? "Sending..." : "Send"}
+          {isExecuting ? "Sending..." : `Send (${shortcutText})`}
         </Button>
         {onOpenLoginResponse && (
           <AuthStatusIndicator onOpenLoginResponse={onOpenLoginResponse} />

@@ -68,7 +68,7 @@ const server = http.createServer(async (req, res) => {
               }`,
               duration: 0,
               size: 0,
-            })
+            }),
           );
         }
       });
@@ -83,7 +83,7 @@ const server = http.createServer(async (req, res) => {
           }`,
           duration: 0,
           size: 0,
-        })
+        }),
       );
     }
     return;

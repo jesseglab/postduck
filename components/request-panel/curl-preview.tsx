@@ -116,7 +116,11 @@ export function CurlPreview({ method, url }: CurlPreviewProps) {
             </CodeBlockSelectTrigger>
             <CodeBlockSelectContent>
               {(item) => (
-                <CodeBlockSelectItem value={item.language} className="text-xs">
+                <CodeBlockSelectItem
+                  key={item.language}
+                  value={item.language}
+                  className="text-xs"
+                >
                   {languageMap[item.language as Language]?.name ||
                     item.language}
                 </CodeBlockSelectItem>

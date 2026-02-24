@@ -1,0 +1,27 @@
+{
+  "watch": [
+    "app",
+    "components",
+    "lib",
+    "hooks",
+    "types",
+    "next.config.ts",
+    "tsconfig.json",
+    "prisma",
+    ".env",
+    ".env.local"
+  ],
+  "ext": "ts,tsx,js,jsx,json",
+  "ignore": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    ".next",
+    "node_modules",
+    "dist",
+    "agent"
+  ],
+  "exec": "next dev -p 5027",
+  "delay": 1000
+}

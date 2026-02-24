@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Code, CodeHeader, CodeBlock } from "@/components/ui/code";
@@ -18,8 +18,11 @@ interface ResponseBodyProps {
 export function ResponseBody({ response }: ResponseBodyProps) {
   const [viewMode, setViewMode] = useState<"pretty" | "raw">("pretty");
 
+  // Ensure body is always a string
+  const responseBody = response.body ?? "";
+  
   let contentType = "text";
-  let formattedBody = response.body;
+  let formattedBody = responseBody;
 
   // Try to detect content type from headers
   const contentTypeHeader =
@@ -30,8 +33,12 @@ export function ResponseBody({ response }: ResponseBodyProps) {
   if (contentTypeHeader.includes("application/json")) {
     contentType = "json";
     try {
-      const parsed = JSON.parse(response.body);
-      formattedBody = JSON.stringify(parsed, null, 2);
+      if (responseBody.trim()) {
+        const parsed = JSON.parse(responseBody);
+        formattedBody = JSON.stringify(parsed, null, 2);
+      } else {
+        formattedBody = "";
+      }
     } catch {
       // Not valid JSON, show as raw
     }
@@ -43,6 +50,20 @@ export function ResponseBody({ response }: ResponseBodyProps) {
   ) {
     contentType = "xml";
   }
+
+  // Debug logging - moved after variable declarations
+  useEffect(() => {
+    console.log("ResponseBody received:", {
+      hasResponse: !!response,
+      bodyType: typeof response?.body,
+      bodyLength: response?.body?.length ?? 0,
+      bodyPreview: response?.body?.substring(0, 100),
+      responseBody,
+      formattedBody,
+      contentType,
+      headers: response?.headers,
+    });
+  }, [response, responseBody, formattedBody, contentType]);
 
   return (
     <div className="flex flex-col h-full p-4 min-h-0 response-body-wrapper">
@@ -82,26 +103,31 @@ export function ResponseBody({ response }: ResponseBodyProps) {
       </div>
 
       <div className="flex-1 overflow-hidden min-h-0">
-        {viewMode === "pretty" && contentType === "html" ? (
+        {!responseBody && !formattedBody ? (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            <span>Response body is empty</span>
+          </div>
+        ) : viewMode === "pretty" && contentType === "html" ? (
           <iframe
-            srcDoc={response.body}
+            srcDoc={responseBody}
             className="w-full h-full border-0 rounded-md"
             title="Response Preview"
           />
         ) : viewMode === "pretty" ? (
           <ScrollArea className="h-full">
-            <Code code={formattedBody}>
+            <Code code={formattedBody || responseBody || ""}>
               <CodeHeader
                 icon={FileText}
                 copyButton={true}
-                code={formattedBody}
+                code={formattedBody || responseBody || ""}
               >
                 <span className="text-sm font-medium">
                   {contentType.toUpperCase()}
                 </span>
               </CodeHeader>
               <CodeBlock
-                code={formattedBody}
+                key={`${response.statusCode}-${responseBody.length}-${formattedBody.length}`}
+                code={formattedBody || responseBody || ""}
                 lang={contentType}
                 theme="dark"
                 writing={false}
@@ -113,7 +139,7 @@ export function ResponseBody({ response }: ResponseBodyProps) {
             <MonacoEditor
               height="100%"
               language={contentType}
-              value={response.body}
+              value={responseBody || ""}
               theme="vs-dark"
               options={{
                 readOnly: true,
